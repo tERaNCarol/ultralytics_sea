@@ -1134,6 +1134,44 @@ def v8_transforms(dataset, imgsz, hyp, stretch=False):
     )  # transforms
 
 
+def enhanced_transforms(dataset, imgsz, hyp, stretch=False):
+    """Two Groups of Mosaic"""
+    pre_transform = Compose(
+        [
+            Mosaic(dataset, imgsz=imgsz, p=hyp.mosaic),
+            CopyPaste(p=hyp.copy_paste),
+            RandomPerspective(
+                degrees=hyp.degrees,
+                translate=hyp.translate,
+                scale=hyp.scale,
+                shear=hyp.shear,
+                perspective=hyp.perspective,
+                pre_transform=None if stretch else LetterBox(new_shape=(imgsz, imgsz)),
+            ),
+        ]
+    )
+    group_mosaic = (
+        [
+            Mosaic(dataset, imgsz=imgsz, p=hyp.mosaic),
+            CopyPaste(p=hyp.copy_paste),
+            RandomPerspective(
+                degrees=hyp.degrees,
+                translate=hyp.translate,
+                scale=hyp.scale,
+                shear=hyp.shear,
+                perspective=hyp.perspective,
+                pre_transform=None if stretch else LetterBox(new_shape=(imgsz, imgsz)),
+            ),
+            MixUp(dataset, pre_transform=pre_transform, p=hyp.mixup)
+        ]
+    )
+    return Compose(
+        [
+            group_mosaic,
+            MixUp(dataset, pre_transform=group_mosaic, p=hyp.mixup),
+        ]
+    )  # transforms
+
 # Classification augmentations -----------------------------------------------------------------------------------------
 def classify_transforms(
     size=224,

@@ -1,5 +1,8 @@
 # Ultralytics YOLO 🚀, AGPL-3.0 license
 
+### to support pycocotools on SeaDroneSee
+### revise init_metrics and eval_json
+
 import os
 from pathlib import Path
 
@@ -66,9 +69,9 @@ class DetectionValidator(BaseValidator):
     def init_metrics(self, model):
         """Initialize evaluation metrics for YOLO."""
         val = self.data.get(self.args.split, "")  # validation path
-        self.is_coco = isinstance(val, str) and "coco" in val and val.endswith(f"{os.sep}val2017.txt")  # is COCO
+        self.is_coco = True  # isinstance(val, str) and "coco" in val and val.endswith(f"{os.sep}val2017.txt")  # is COCO
         self.is_lvis = isinstance(val, str) and "lvis" in val and not self.is_coco  # is LVIS
-        self.class_map = converter.coco80_to_coco91_class() if self.is_coco else list(range(len(model.names)))
+        self.class_map = list(range(len(model.names)))  # converter.coco80_to_coco91_class() if self.is_coco else list(range(len(model.names)))
         self.args.save_json |= (self.is_coco or self.is_lvis) and not self.training  # run on final val if training COCO
         self.names = model.names
         self.nc = len(model.names)
@@ -282,7 +285,7 @@ class DetectionValidator(BaseValidator):
             anno_json = (
                 self.data["path"]
                 / "annotations"
-                / ("instances_val2017.json" if self.is_coco else f"lvis_v1_{self.args.split}.json")
+                / ("instances_val.json" if self.is_coco else f"lvis_v1_{self.args.split}.json")
             )  # annotations
             pkg = "pycocotools" if self.is_coco else "lvis"
             LOGGER.info(f"\nEvaluating {pkg} mAP using {pred_json} and {anno_json}...")

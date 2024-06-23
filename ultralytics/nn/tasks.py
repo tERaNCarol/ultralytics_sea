@@ -13,6 +13,8 @@ from ultralytics.nn.modules import (
     C2,
     C3,
     C3TR,
+    # new attention
+    CBAM,
     OBB,
     SPP,
     SPPELAN,
@@ -925,6 +927,17 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             args = [c1, c2, *args[1:]]
         elif m is CBFuse:
             c2 = ch[f[-1]]
+        elif m is CBAM:  # todo 源码修改 （增加了elif）
+            """
+            ch[f]:上一层的
+            args[0]:第0个参数
+            c1:输入通道数
+            c2:输出通道数
+            """
+            c1, c2 = ch[f], args[0]
+            if c2 != nc:  # if c2 not equal to number of classes (i.e. for Classify() output)
+                c2 = make_divisible(c2 * width, 8)
+            args = [c1, *args[1:]]
         else:
             c2 = ch[f]
 
