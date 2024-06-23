@@ -1,0 +1,15 @@
+path: /root/autodl-tmp/SeaDroneSee
+train: train.txt
+val: val.txt
+test: test.txt
+
+nc: 6
+
+names:
+  0: ignore
+  1: swimmer
+  2: boat
+  3: jetski
+  4: life_saving_appliances
+  5: buoy
+
